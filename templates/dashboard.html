@@ -2,18 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Habit Tracker</title>
+    <title>Dashboard - Habit Tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <div class="container">
-        <h1>Habit Tracker</h1>
-        <p>A multi-user Flask web application for tracking personal habits.</p>
+        <h1>Welcome, {{ username }}</h1>
+        <p>This is your personal habit dashboard.</p>
 
         <div class="buttons">
-            <a href="{{ url_for('register') }}">Register</a>
-            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
         </div>
     </div>
 
