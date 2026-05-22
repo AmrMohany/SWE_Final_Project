@@ -86,8 +86,53 @@ def dashboard():
         flash("Please login first.")
         return redirect(url_for("login"))
 
-    return render_template("dashboard.html", username=session["username"])
+    connection = get_db_connection()
+    habits = connection.execute(
+        """
+        SELECT * FROM habits
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        """,
+        (session["user_id"],)
+    ).fetchall()
+    connection.close()
 
+    return render_template(
+        "dashboard.html",
+        username=session["username"],
+        habits=habits
+    )
+
+@app.route("/add-habit", methods=["GET", "POST"])
+def add_habit():
+    if "user_id" not in session:
+        flash("Please login first.")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        title = request.form["title"].strip()
+        description = request.form["description"].strip()
+        frequency = request.form["frequency"]
+
+        if not title:
+            flash("Habit title is required.")
+            return redirect(url_for("add_habit"))
+
+        connection = get_db_connection()
+        connection.execute(
+            """
+            INSERT INTO habits (user_id, title, description, frequency)
+            VALUES (?, ?, ?, ?)
+            """,
+            (session["user_id"], title, description, frequency)
+        )
+        connection.commit()
+        connection.close()
+
+        flash("Habit added successfully.")
+        return redirect(url_for("dashboard"))
+
+    return render_template("add_habit.html")
 
 @app.route("/logout")
 def logout():

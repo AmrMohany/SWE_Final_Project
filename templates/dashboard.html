@@ -7,13 +7,41 @@
 </head>
 <body>
 
-    <div class="container">
+    <div class="container large">
         <h1>Welcome, {{ username }}</h1>
         <p>This is your personal habit dashboard.</p>
 
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="message">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <div class="buttons">
+            <a href="{{ url_for('add_habit') }}">Add New Habit</a>
             <a href="{{ url_for('logout') }}">Logout</a>
         </div>
+
+        <h2>My Habits</h2>
+
+        {% if habits %}
+            <div class="habit-list">
+                {% for habit in habits %}
+                    <div class="habit-card">
+                        <h3>{{ habit["title"] }}</h3>
+                        <p>{{ habit["description"] }}</p>
+                        <p><strong>Frequency:</strong> {{ habit["frequency"] }}</p>
+                        <p><strong>Created at:</strong> {{ habit["created_at"] }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No habits yet. Add your first habit now.</p>
+        {% endif %}
     </div>
 
 </body>
