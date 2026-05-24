@@ -39,7 +39,13 @@
                 {% for habit in habits %}
                     <div class="habit-card">
                         <h3>{{ habit["title"] }}</h3>
-                        <p>{{ habit["description"] }}</p>
+
+                        {% if habit["description"] %}
+                            <p>{{ habit["description"] }}</p>
+                        {% else %}
+                            <p>No description provided.</p>
+                        {% endif %}
+
                         <p><strong>Frequency:</strong> {{ habit["frequency"] }}</p>
                         <p><strong>Created at:</strong> {{ habit["created_at"] }}</p>
 
@@ -50,6 +56,18 @@
                                 <button type="submit">Mark as Completed Today</button>
                             </form>
                         {% endif %}
+
+                        <div class="habit-actions">
+                            <a class="edit-btn" href="{{ url_for('edit_habit', habit_id=habit['id']) }}">
+                                Edit
+                            </a>
+
+                            <form method="POST" action="{{ url_for('delete_habit', habit_id=habit['id']) }}" class="delete-form">
+                                <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this habit?');">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 {% endfor %}
             </div>

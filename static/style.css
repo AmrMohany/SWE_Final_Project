@@ -127,3 +127,34 @@ select {
     border-radius: 6px;
     font-weight: bold;
 }
+.habit-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    align-items: center;
+}
+
+.edit-btn {
+    text-decoration: none;
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.edit-btn:hover {
+    background-color: #5a6268;
+}
+
+.delete-form {
+    margin: 0;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+}
+
+.delete-btn:hover {
+    background-color: #b02a37;
+}

@@ -209,6 +209,96 @@ def complete_habit(habit_id):
     connection.close()
     return redirect(url_for("dashboard"))
 
+@app.route("/edit-habit/<int:habit_id>", methods=["GET", "POST"])
+def edit_habit(habit_id):
+    if "user_id" not in session:
+        flash("Please login first.")
+        return redirect(url_for("login"))
+
+    connection = get_db_connection()
+
+    habit = connection.execute(
+        """
+        SELECT * FROM habits
+        WHERE id = ? AND user_id = ?
+        """,
+        (habit_id, session["user_id"])
+    ).fetchone()
+
+    if habit is None:
+        connection.close()
+        flash("Habit not found or access denied.")
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        title = request.form["title"].strip()
+        description = request.form["description"].strip()
+        frequency = request.form["frequency"]
+
+        if not title:
+            flash("Habit title is required.")
+            connection.close()
+            return redirect(url_for("edit_habit", habit_id=habit_id))
+
+        connection.execute(
+            """
+            UPDATE habits
+            SET title = ?, description = ?, frequency = ?
+            WHERE id = ? AND user_id = ?
+            """,
+            (title, description, frequency, habit_id, session["user_id"])
+        )
+        connection.commit()
+        connection.close()
+
+        flash("Habit updated successfully.")
+        return redirect(url_for("dashboard"))
+
+    connection.close()
+    return render_template("edit_habit.html", habit=habit)
+@app.route("/delete-habit/<int:habit_id>", methods=["POST"])
+def delete_habit(habit_id):
+    if "user_id" not in session:
+        flash("Please login first.")
+        return redirect(url_for("login"))
+
+    connection = get_db_connection()
+
+    habit = connection.execute(
+        """
+        SELECT * FROM habits
+        WHERE id = ? AND user_id = ?
+        """,
+        (habit_id, session["user_id"])
+    ).fetchone()
+
+    if habit is None:
+        connection.close()
+        flash("Habit not found or access denied.")
+        return redirect(url_for("dashboard"))
+
+    connection.execute(
+        """
+        DELETE FROM habit_logs
+        WHERE habit_id = ? AND user_id = ?
+        """,
+        (habit_id, session["user_id"])
+    )
+
+    connection.execute(
+        """
+        DELETE FROM habits
+        WHERE id = ? AND user_id = ?
+        """,
+        (habit_id, session["user_id"])
+    )
+
+    connection.commit()
+    connection.close()
+
+    flash("Habit deleted successfully.")
+    return redirect(url_for("dashboard"))
+
 @app.route("/logout")
 def logout():
     session.clear()

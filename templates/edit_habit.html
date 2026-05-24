@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Habit - Habit Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Edit Habit</h1>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="message">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="text" name="title" value="{{ habit['title'] }}" required>
+
+            <input type="text" name="description" value="{{ habit['description'] }}">
+
+            <select name="frequency" required>
+                <option value="Daily" {% if habit['frequency'] == 'Daily' %}selected{% endif %}>Daily</option>
+                <option value="Weekly" {% if habit['frequency'] == 'Weekly' %}selected{% endif %}>Weekly</option>
+            </select>
+
+            <button type="submit">Update Habit</button>
+        </form>
+
+        <div class="buttons">
+            <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+        </div>
+    </div>
+
+</body>
+</html>
