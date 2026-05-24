@@ -11,6 +11,12 @@
         <h1>Welcome, {{ username }}</h1>
         <p>This is your personal habit dashboard.</p>
 
+        <div class="progress-box">
+            <h2>Weekly Progress</h2>
+            <p><strong>Completed habits this week:</strong> {{ weekly_completed }}</p>
+            <p><strong>Weekly completion rate:</strong> {{ weekly_progress }}%</p>
+        </div>
+
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <div class="message">
@@ -36,6 +42,14 @@
                         <p>{{ habit["description"] }}</p>
                         <p><strong>Frequency:</strong> {{ habit["frequency"] }}</p>
                         <p><strong>Created at:</strong> {{ habit["created_at"] }}</p>
+
+                        {% if habit["completed_today"] %}
+                            <p class="completed">Completed Today ✅</p>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('complete_habit', habit_id=habit['id']) }}">
+                                <button type="submit">Mark as Completed Today</button>
+                            </form>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>

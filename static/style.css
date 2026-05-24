@@ -106,3 +106,24 @@ select {
     margin: 0 0 10px 0;
     color: #2c3e50;
 }
+
+.progress-box {
+    background-color: #eef3f7;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 25px 0;
+    text-align: left;
+}
+
+.progress-box h2 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.completed {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: bold;
+}

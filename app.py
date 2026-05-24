@@ -87,20 +87,58 @@ def dashboard():
         return redirect(url_for("login"))
 
     connection = get_db_connection()
+
     habits = connection.execute(
         """
-        SELECT * FROM habits
-        WHERE user_id = ?
-        ORDER BY created_at DESC
+        SELECT 
+            habits.*,
+            CASE 
+                WHEN habit_logs.id IS NOT NULL THEN 1
+                ELSE 0
+            END AS completed_today
+        FROM habits
+        LEFT JOIN habit_logs
+            ON habits.id = habit_logs.habit_id
+            AND habit_logs.completed_date = DATE('now')
+        WHERE habits.user_id = ?
+        ORDER BY habits.created_at DESC
         """,
         (session["user_id"],)
     ).fetchall()
+
+    habit_count = connection.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM habits
+        WHERE user_id = ?
+        """,
+        (session["user_id"],)
+    ).fetchone()["total"]
+
+    weekly_completed = connection.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM habit_logs
+        WHERE user_id = ?
+        AND completed_date >= DATE('now', '-6 days')
+        """,
+        (session["user_id"],)
+    ).fetchone()["total"]
+
+    if habit_count > 0:
+        weekly_goal = habit_count * 7
+        weekly_progress = round((weekly_completed / weekly_goal) * 100)
+    else:
+        weekly_progress = 0
+
     connection.close()
 
     return render_template(
         "dashboard.html",
         username=session["username"],
-        habits=habits
+        habits=habits,
+        weekly_completed=weekly_completed,
+        weekly_progress=weekly_progress
     )
 
 @app.route("/add-habit", methods=["GET", "POST"])
@@ -133,6 +171,43 @@ def add_habit():
         return redirect(url_for("dashboard"))
 
     return render_template("add_habit.html")
+
+@app.route("/complete-habit/<int:habit_id>", methods=["POST"])
+def complete_habit(habit_id):
+    if "user_id" not in session:
+        flash("Please login first.")
+        return redirect(url_for("login"))
+
+    connection = get_db_connection()
+
+    habit = connection.execute(
+        """
+        SELECT * FROM habits
+        WHERE id = ? AND user_id = ?
+        """,
+        (habit_id, session["user_id"])
+    ).fetchone()
+
+    if habit is None:
+        connection.close()
+        flash("Habit not found or access denied.")
+        return redirect(url_for("dashboard"))
+
+    try:
+        connection.execute(
+            """
+            INSERT INTO habit_logs (habit_id, user_id, completed_date)
+            VALUES (?, ?, DATE('now'))
+            """,
+            (habit_id, session["user_id"])
+        )
+        connection.commit()
+        flash("Habit marked as completed for today.")
+    except:
+        flash("This habit is already completed today.")
+
+    connection.close()
+    return redirect(url_for("dashboard"))
 
 @app.route("/logout")
 def logout():
