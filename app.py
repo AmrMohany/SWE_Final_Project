@@ -1,11 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_db_connection, init_db
+from datetime import date, timedelta
 
 app = Flask(__name__)
 
 app.secret_key = "habit_tracker_secret_key"
 
+
+def calculate_streak(completed_dates):
+    streak = 0
+    today = date.today()
+
+    completed_dates_set = set(completed_dates)
+
+    current_day = today
+
+    if current_day.isoformat() not in completed_dates_set:
+        current_day = today - timedelta(days=1)
+
+    while current_day.isoformat() in completed_dates_set:
+        streak += 1
+        current_day -= timedelta(days=1)
+
+    return streak
 
 @app.route("/")
 def index():
@@ -131,16 +149,36 @@ def dashboard():
     else:
         weekly_progress = 0
 
+    habits_with_streaks = []
+
+    for habit in habits:
+        logs = connection.execute(
+            """
+            SELECT completed_date
+            FROM habit_logs
+            WHERE habit_id = ? AND user_id = ?
+            ORDER BY completed_date DESC
+            """,
+            (habit["id"], session["user_id"])
+        ).fetchall()
+
+        completed_dates = [log["completed_date"] for log in logs]
+        streak = calculate_streak(completed_dates)
+
+        habit_data = dict(habit)
+        habit_data["streak"] = streak
+        habits_with_streaks.append(habit_data)
+
     connection.close()
 
     return render_template(
         "dashboard.html",
         username=session["username"],
-        habits=habits,
+        habits=habits_with_streaks,
         weekly_completed=weekly_completed,
         weekly_progress=weekly_progress
     )
-
+    
 @app.route("/add-habit", methods=["GET", "POST"])
 def add_habit():
     if "user_id" not in session:
