@@ -50,9 +50,24 @@
         {% endwith %}
 
         <div class="buttons">
-            <a href="{{ url_for('add_habit') }}">Add New Habit</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        </div>
+    <a href="{{ url_for('add_habit') }}">Add New Habit</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</div>
+
+<div class="account-danger-zone">
+    <h3>Danger Zone</h3>
+    <p>Deleting your account will permanently remove your account, habits, and habit completion history.</p>
+
+    <form method="POST" action="{{ url_for('delete_account') }}">
+        <button 
+            type="submit" 
+            class="delete-account-btn"
+            onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');"
+        >
+            Delete My Account
+        </button>
+    </form>
+</div>
 
         <form method="GET" action="{{ url_for('dashboard') }}" class="search-form">
             <input 

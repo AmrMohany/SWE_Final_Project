@@ -355,6 +355,47 @@ def delete_habit(habit_id):
     flash("Habit deleted successfully.")
     return redirect(url_for("dashboard"))
 
+@app.route("/delete-account", methods=["POST"])
+def delete_account():
+    if "user_id" not in session:
+        flash("Please login first.")
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+
+    connection = get_db_connection()
+
+    connection.execute(
+        """
+        DELETE FROM habit_logs
+        WHERE user_id = ?
+        """,
+        (user_id,)
+    )
+
+    connection.execute(
+        """
+        DELETE FROM habits
+        WHERE user_id = ?
+        """,
+        (user_id,)
+    )
+
+    connection.execute(
+        """
+        DELETE FROM users
+        WHERE id = ?
+        """,
+        (user_id,)
+    )
+
+    connection.commit()
+    connection.close()
+
+    session.clear()
+    flash("Your account and all related data have been deleted successfully.")
+    return redirect(url_for("index"))
+
 @app.route("/logout")
 def logout():
     session.clear()

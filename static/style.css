@@ -271,3 +271,29 @@ button:hover {
         font-size: 30px;
     }
 }
+
+.account-danger-zone {
+    margin: 30px 0;
+    padding: 20px;
+    border-radius: 16px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    text-align: left;
+}
+
+.account-danger-zone h3 {
+    margin-top: 0;
+    color: #991b1b;
+}
+
+.account-danger-zone p {
+    color: #7f1d1d;
+}
+
+.delete-account-btn {
+    background-color: #991b1b;
+}
+
+.delete-account-btn:hover {
+    background-color: #7f1d1d;
+}
