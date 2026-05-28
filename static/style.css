@@ -158,3 +158,59 @@ select {
 .delete-btn:hover {
     background-color: #b02a37;
 }
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.stat-card {
+    background-color: #f8f9fa;
+    padding: 18px;
+    border-radius: 10px;
+    text-align: center;
+    border-top: 4px solid #2c3e50;
+}
+
+.stat-card h3 {
+    font-size: 16px;
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+}
+
+.stat-card p {
+    font-size: 26px;
+    font-weight: bold;
+    margin: 0;
+    color: #333;
+}
+
+.search-form {
+    margin: 25px 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-form input {
+    flex: 1;
+    margin: 0;
+}
+
+.search-form button {
+    margin: 0;
+}
+
+.clear-search {
+    text-decoration: none;
+    background-color: #6c757d;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 6px;
+}
+
+.clear-search:hover {
+    background-color: #5a6268;
+}

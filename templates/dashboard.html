@@ -11,6 +11,28 @@
         <h1>Welcome, {{ username }}</h1>
         <p>This is your personal habit dashboard.</p>
 
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Habits</h3>
+                <p>{{ habit_count }}</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Completed Today</h3>
+                <p>{{ completed_today_count }}</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Not Completed</h3>
+                <p>{{ not_completed_today_count }}</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Weekly Progress</h3>
+                <p>{{ weekly_progress }}%</p>
+            </div>
+        </div>
+
         <div class="progress-box">
             <h2>Weekly Progress</h2>
             <p><strong>Completed habits this week:</strong> {{ weekly_completed }}</p>
@@ -32,7 +54,25 @@
             <a href="{{ url_for('logout') }}">Logout</a>
         </div>
 
+        <form method="GET" action="{{ url_for('dashboard') }}" class="search-form">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Search habits by name..." 
+                value="{{ search_query }}"
+            >
+            <button type="submit">Search</button>
+
+            {% if search_query %}
+                <a class="clear-search" href="{{ url_for('dashboard') }}">Clear</a>
+            {% endif %}
+        </form>
+
         <h2>My Habits</h2>
+
+        {% if search_query %}
+            <p>Search results for: <strong>{{ search_query }}</strong></p>
+        {% endif %}
 
         {% if habits %}
             <div class="habit-list">
@@ -74,7 +114,11 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p>No habits yet. Add your first habit now.</p>
+            {% if search_query %}
+                <p>No habits found with this name.</p>
+            {% else %}
+                <p>No habits yet. Add your first habit now.</p>
+            {% endif %}
         {% endif %}
     </div>
 

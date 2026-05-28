@@ -86,26 +86,49 @@ def dashboard():
         flash("Please login first.")
         return redirect(url_for("login"))
 
+    search_query = request.args.get("search", "").strip()
+
     connection = get_db_connection()
 
-    habits = connection.execute(
-        """
-        SELECT 
-            habits.*,
-            CASE 
-                WHEN habit_logs.id IS NOT NULL THEN 1
-                ELSE 0
-            END AS completed_today,
-            CAST(julianday('now') - julianday(habits.created_at) AS INTEGER) + 1 AS active_days
-        FROM habits
-        LEFT JOIN habit_logs
-            ON habits.id = habit_logs.habit_id
-            AND habit_logs.completed_date = DATE('now')
-        WHERE habits.user_id = ?
-        ORDER BY habits.created_at DESC
-        """,
-        (session["user_id"],)
-    ).fetchall()
+    if search_query:
+        habits = connection.execute(
+            """
+            SELECT 
+                habits.*,
+                CASE 
+                    WHEN habit_logs.id IS NOT NULL THEN 1
+                    ELSE 0
+                END AS completed_today,
+                CAST(julianday('now') - julianday(habits.created_at) AS INTEGER) + 1 AS active_days
+            FROM habits
+            LEFT JOIN habit_logs
+                ON habits.id = habit_logs.habit_id
+                AND habit_logs.completed_date = DATE('now')
+            WHERE habits.user_id = ?
+            AND habits.title LIKE ?
+            ORDER BY habits.created_at DESC
+            """,
+            (session["user_id"], f"%{search_query}%")
+        ).fetchall()
+    else:
+        habits = connection.execute(
+            """
+            SELECT 
+                habits.*,
+                CASE 
+                    WHEN habit_logs.id IS NOT NULL THEN 1
+                    ELSE 0
+                END AS completed_today,
+                CAST(julianday('now') - julianday(habits.created_at) AS INTEGER) + 1 AS active_days
+            FROM habits
+            LEFT JOIN habit_logs
+                ON habits.id = habit_logs.habit_id
+                AND habit_logs.completed_date = DATE('now')
+            WHERE habits.user_id = ?
+            ORDER BY habits.created_at DESC
+            """,
+            (session["user_id"],)
+        ).fetchall()
 
     habit_count = connection.execute(
         """
@@ -115,6 +138,18 @@ def dashboard():
         """,
         (session["user_id"],)
     ).fetchone()["total"]
+
+    completed_today_count = connection.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM habit_logs
+        WHERE user_id = ?
+        AND completed_date = DATE('now')
+        """,
+        (session["user_id"],)
+    ).fetchone()["total"]
+
+    not_completed_today_count = habit_count - completed_today_count
 
     weekly_completed = connection.execute(
         """
@@ -155,35 +190,11 @@ def dashboard():
         username=session["username"],
         habits=habits_with_streaks,
         weekly_completed=weekly_completed,
-        weekly_progress=weekly_progress
-    )
-
-    for habit in habits:
-        logs = connection.execute(
-            """
-            SELECT completed_date
-            FROM habit_logs
-            WHERE habit_id = ? AND user_id = ?
-            ORDER BY completed_date DESC
-            """,
-            (habit["id"], session["user_id"])
-        ).fetchall()
-
-        completed_dates = [log["completed_date"] for log in logs]
-        streak = calculate_streak(completed_dates)
-
-        habit_data = dict(habit)
-        habit_data["streak"] = streak
-        habits_with_streaks.append(habit_data)
-
-    connection.close()
-
-    return render_template(
-        "dashboard.html",
-        username=session["username"],
-        habits=habits_with_streaks,
-        weekly_completed=weekly_completed,
-        weekly_progress=weekly_progress
+        weekly_progress=weekly_progress,
+        habit_count=habit_count,
+        completed_today_count=completed_today_count,
+        not_completed_today_count=not_completed_today_count,
+        search_query=search_query
     )
     
 @app.route("/add-habit", methods=["GET", "POST"])
