@@ -48,6 +48,7 @@
 
                         <p><strong>Frequency:</strong> {{ habit["frequency"] }}</p>
                         <p><strong>Current Streak:</strong> {{ habit["streak"] }} day(s)</p>
+                        <p><strong>Active for:</strong> {{ habit["active_days"] }} day(s)</p>
                         <p><strong>Created at:</strong> {{ habit["created_at"] }}</p>
 
                         {% if habit["completed_today"] %}

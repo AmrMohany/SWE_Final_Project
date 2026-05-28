@@ -113,7 +113,8 @@ def dashboard():
             CASE 
                 WHEN habit_logs.id IS NOT NULL THEN 1
                 ELSE 0
-            END AS completed_today
+            END AS completed_today,
+            CAST(julianday('now') - julianday(habits.created_at) AS INTEGER) + 1 AS active_days
         FROM habits
         LEFT JOIN habit_logs
             ON habits.id = habit_logs.habit_id
